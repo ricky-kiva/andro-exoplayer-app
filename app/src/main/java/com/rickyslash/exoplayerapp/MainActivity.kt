@@ -4,8 +4,8 @@ import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import com.google.android.exoplayer2.ExoPlayer
 import com.google.android.exoplayer2.MediaItem
+import com.google.android.exoplayer2.util.Util
 import com.rickyslash.exoplayerapp.databinding.ActivityMainBinding
-import java.net.URL
 
 class MainActivity : AppCompatActivity() {
 
@@ -14,6 +14,8 @@ class MainActivity : AppCompatActivity() {
     private val viewBinding by lazy(LazyThreadSafetyMode.NONE) {
         ActivityMainBinding.inflate(layoutInflater)
     }
+
+    private var player: ExoPlayer? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -33,6 +35,65 @@ class MainActivity : AppCompatActivity() {
 
         // player starts loading the media
         player.prepare()
+    }
+
+    override fun onStart() {
+        super.onStart()
+        // this to support multiple windows in API level 24 & above
+        // because app is seen but not active on split windows mode
+        if (Util.SDK_INT > 23) {
+            initializePlayer()
+        }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        // on API level 23 and below, app need to wait for the resource to be fulfilled
+        // so it's called on onResume
+        if (Util.SDK_INT <= 23 && player == null) {
+            initializePlayer()
+        }
+    }
+
+    override fun onPause() {
+        super.onPause()
+        // on API level 23, onStop() not guaranteed. So it needs to be dispatched by onPause()
+        if (Util.SDK_INT <= 23) {
+            releasePlayer()
+        }
+    }
+
+    override fun onStop() {
+        super.onStop()
+        // on API level 24 & above, onStop() is guaranteed
+        if (Util.SDK_INT > 23) {
+            releasePlayer()
+        }
+    }
+
+    private fun initializePlayer() {
+        // add media to exoplayer's playlist
+        val mediaItem = MediaItem.fromUri(URL_VIDEO_DICODING)
+        val anotherMediaItem = MediaItem.fromUri(URL_AUDIO)
+
+        // Build exoplayer
+        player = ExoPlayer.Builder(this).build().also { exoPlayer ->
+
+            // assign to View
+            viewBinding.exoPlayerview.player = exoPlayer
+
+            // add media to exoplayer's playlist
+            exoPlayer.setMediaItem(mediaItem)
+            exoPlayer.addMediaItem(anotherMediaItem)
+
+            // player starts loading the media
+            exoPlayer.prepare()
+        }
+    }
+
+    private fun releasePlayer() {
+        player?.release()
+        player = null
     }
     
     companion object {
