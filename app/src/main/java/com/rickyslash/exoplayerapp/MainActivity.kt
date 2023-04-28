@@ -2,6 +2,9 @@ package com.rickyslash.exoplayerapp
 
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import androidx.core.view.WindowCompat
+import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.WindowInsetsControllerCompat
 import com.google.android.exoplayer2.ExoPlayer
 import com.google.android.exoplayer2.MediaItem
 import com.google.android.exoplayer2.util.Util
@@ -48,6 +51,7 @@ class MainActivity : AppCompatActivity() {
 
     override fun onResume() {
         super.onResume()
+        hideSystemUI()
         // on API level 23 and below, app need to wait for the resource to be fulfilled
         // so it's called on onResume
         if (Util.SDK_INT <= 23 && player == null) {
@@ -94,6 +98,19 @@ class MainActivity : AppCompatActivity() {
     private fun releasePlayer() {
         player?.release()
         player = null
+    }
+
+    private fun hideSystemUI() {
+        // this to make the systemUI overlays not overlap the content of the window
+        // systemUI overlays are the elements that appear on top of application's content (status bar & nav bar)
+        WindowCompat.setDecorFitsSystemWindows(window, false)
+        // this control systemUI behavior of the window
+        WindowInsetsControllerCompat(window, viewBinding.exoPlayerview).let { controller ->
+            // this to hide systemBars
+            controller.hide(WindowInsetsCompat.Type.systemBars())
+            // this to show the system bar when user swipe on the corresponding area
+            controller.systemBarsBehavior = WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
+        }
     }
     
     companion object {
