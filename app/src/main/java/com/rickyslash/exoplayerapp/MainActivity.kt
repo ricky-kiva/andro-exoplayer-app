@@ -25,7 +25,11 @@ class MainActivity : AppCompatActivity() {
 
         // set media that needs to be played
         val mediaItem = MediaItem.fromUri(URL_VIDEO_DICODING)
+        val anotherMediaItem = MediaItem.fromUri(URL_AUDIO)
+
+        // add media to exoplayer's playlist
         player.setMediaItem(mediaItem)
+        player.addMediaItem(anotherMediaItem)
 
         // player starts loading the media
         player.prepare()
@@ -33,5 +37,6 @@ class MainActivity : AppCompatActivity() {
     
     companion object {
         const val URL_VIDEO_DICODING = "https://github.com/dicodingacademy/assets/releases/download/release-video/VideoDicoding.mp4"
+        const val URL_AUDIO = "https://github.com/dicodingacademy/assets/raw/main/android_intermediate_academy/bensound_ukulele.mp3"
     }
 }
